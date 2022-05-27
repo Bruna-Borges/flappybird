@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
@@ -10,11 +11,14 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.RandomXS128;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class flappybird extends ApplicationAdapter {
@@ -45,15 +49,15 @@ public class flappybird extends ApplicationAdapter {
 	private int estadoJogo = 0;
 	private float posicaHorizontalPassaro = 0;
 
-	BitmapFont textPontuacao;
-	BitmapFont textReiniciar;
-	BitmapFont textMlehorPontuacao;
+	BitmapFont textoPontuacao;
+	BitmapFont textoReiniciar;
+	BitmapFont textoMelhorPontuacao;
 
 	Sound somVoando;
 	Sound somColisao;
 	Sound somPontuacao;
 
-	Preferences preferences;
+	Preferences preferencias;
 
 
 	private OrthographicCamera camera;
@@ -93,9 +97,129 @@ public class flappybird extends ApplicationAdapter {
 	private void inicializarObjetos(){
 		batch = new SpriteBatch();
 		random = new Random();
+
+		larguraDispositivo = VIRTUAL_WIDTH;
+		alturaDispositivo = VIRTUAL_HEIGTH;
+		posicaoInicialVerticalPassaro = alturaDispositivo / 2;
+		posicaoCanoHorizontal = larguraDispositivo;
+		espacoEntreCanos = 350;
+
+		textoPontuacao = new BitmapFont();
+		textoPontuacao.setColor(Color.WHITE);
+		textoPontuacao.getData().setScale(10);
+
+		textoMelhorPontuacao = new BitmapFont();
+		textoMelhorPontuacao.setColor(Color.RED);
+		textoMelhorPontuacao.getData().setScale(2);
+
+		shapeRenderer = new ShapeRenderer();
+		circuloPassaro = new Circle();
+		retanguloCanoBaixo = new Rectangle();
+		retanguloCanoCima = new Rectangle();
+
+
+		somVoando =Gdx.audio.newSound( Gdx.files.internal("som_asa.wav"));
+		somColisao = Gdx.audio.newSound( Gdx.files.internal("som_batida.wav"));
+		somPontuacao = Gdx.audio.newSound( Gdx.files.internal("som_pontos.wav"));
+
+		camera = new OrthographicCamera();
+		camera.position.set(VIRTUAL_WIDTH/2, VIRTUAL_HEIGTH/2,0);
+		viewport = new StretchViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGTH, camera);
+
+	}
+	private void verificandoEstadoJogo(){
+		boolean toqueTela = Gdx.input.justTouched();
+		if (estadoJogo == 0 ){
+			if (toqueTela){
+				gravidade = -15;
+				estadoJogo = 1;
+				somVoando.play();
+			}
+		}else if (estadoJogo == 1){
+			if (toqueTela){
+				gravidade = -15;
+				somVoando.play();
+
+			}
+			posicaoCanoHorizontal -= Gdx.graphics.getDeltaTime() * 200;
+			if (posicaoCanoHorizontal < -canoTopo.getWidth() ){
+				posicaoCanoHorizontal = larguraDispositivo;
+				posicaoCanoVertical = random.nextInt(400) - 200;
+				passouCano = false;
+			}
+			if (posicaoInicialVerticalPassaro > 0 || toqueTela)
+				posicaoInicialVerticalPassaro = posicaoInicialVerticalPassaro - gravidade;
+			gravidade++;
+		}else if (estadoJogo == 2){
+			if (pontos > pontuacaoMaxima){
+				pontuacaoMaxima = pontos;
+				preferencias.putInteger("pontuacaoMaxima", pontuacaoMaxima);
+				preferencias.flush();
+			}
+			posicaHorizontalPassaro -= Gdx.graphics.getDeltaTime()*500;
+
+			if (toqueTela){
+				estadoJogo = 0;
+				pontos = 0;
+				gravidade = 0;
+				posicaHorizontalPassaro = 0;
+				posicaoInicialVerticalPassaro = alturaDispositivo /2;
+				posicaoCanoHorizontal = larguraDispositivo;
+			}
+		}
 	}
 
-	larguraDispositivo = VIRTUAL_WIDTH;
-	alturaDisposivo = VIRTUAL_HEIGHT;
-	posi
+	private void detectarColisoes(){
+
+		circuloPassaro.set(
+				50 + posicaoCanoHorizontal + passaros[0].getWidth() / 2,
+				posicaoInicialVerticalPassaro + passaros[0].getHeight() / 2,
+				passaros[0].getWidth() / 2
+		);
+		retanguloCanoBaixo.set(
+				posicaoCanoHorizontal,
+				alturaDispositivo / 2 - canoBaixo.getWidth() - espacoEntreCanos / 2 + posicaoCanoHorizontal,
+				canoBaixo.getWidth(), canoBaixo.getHeight()
+		);
+		retanguloCanoCima.set(
+				posicaoCanoHorizontal, alturaDispositivo / 2 + espacoEntreCanos / 2 + posicaoCanoVertical,
+				canoTopo.getWidth(), canoTopo.getHeight()
+		);
+
+		boolean colidiuCanoCima = Intersector.overlaps(circuloPassaro, retanguloCanoCima);
+		boolean colidiuCanoBaixo = Intersector.overlaps(circuloPassaro, retanguloCanoBaixo);
+
+		if (colidiuCanoCima || colidiuCanoBaixo){
+			if (estadoJogo == 1){
+				somColisao.play();
+				estadoJogo = 2;
+			}
+		}
+	}
+	private void desenharTexturas(){
+		batch.setProjectionMatrix(camera.combined);
+		batch.begin();
+		batch.draw(fundo,0,0,larguraDispositivo, alturaDispositivo);
+		batch.draw(passaros[ (int) variacao],
+				50 + posicaHorizontalPassaro, posicaoInicialVerticalPassaro);
+		batch.draw(canoBaixo,posicaoCanoHorizontal,
+				alturaDispositivo / 2 - canoBaixo.getHeight() - espacoEntreCanos /2 + posicaoCanoVertical);
+		batch.draw(canoTopo,posicaoCanoHorizontal,
+				alturaDispositivo / 2 + espacoEntreCanos / 2 + posicaoCanoVertical );
+		textoPontuacao.draw(batch, String.valueOf(pontos), larguraDispositivo/2,
+				alturaDispositivo -110);
+
+
+		if (estadoJogo ==2){
+			batch.draw(gameOver, larguraDispositivo / 2 - gameOver.getWidth()/2,
+					alturaDispositivo / 2);
+			textoReiniciar.draw(batch,
+					"Toque para reiniciar!", larguraDispositivo/2 -140,
+					alturaDispositivo/2 - gameOver.getHeight()/2);
+			textoMelhorPontuacao.draw(batch,
+					"Set record é: " + pontuacaoMaxima + "pontos",
+					larguraDispositivo/2 -140,alturaDispositivo/2 - gameOver.getHeight());
+		}
+		batch.end();
+	}
 }
