@@ -73,7 +73,9 @@ public class flappybird extends ApplicationAdapter {
 		inicializarObjetos();
 	}
 
-	@Override public void render () {
+	@Override
+	public void render () {
+
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		verificandoEstadoJogo();
@@ -129,6 +131,7 @@ public class flappybird extends ApplicationAdapter {
 
 	}
 	private void verificandoEstadoJogo(){
+
 		boolean toqueTela = Gdx.input.justTouched();
 		if (estadoJogo == 0 ){
 			if (toqueTela){
@@ -151,6 +154,8 @@ public class flappybird extends ApplicationAdapter {
 			if (posicaoInicialVerticalPassaro > 0 || toqueTela)
 				posicaoInicialVerticalPassaro = posicaoInicialVerticalPassaro - gravidade;
 			gravidade++;
+
+
 		}else if (estadoJogo == 2){
 			if (pontos > pontuacaoMaxima){
 				pontuacaoMaxima = pontos;
@@ -164,7 +169,7 @@ public class flappybird extends ApplicationAdapter {
 				pontos = 0;
 				gravidade = 0;
 				posicaHorizontalPassaro = 0;
-				posicaoInicialVerticalPassaro = alturaDispositivo /2;
+				posicaoInicialVerticalPassaro = alturaDispositivo / 2;
 				posicaoCanoHorizontal = larguraDispositivo;
 			}
 		}
@@ -179,7 +184,7 @@ public class flappybird extends ApplicationAdapter {
 		);
 		retanguloCanoBaixo.set(
 				posicaoCanoHorizontal,
-				alturaDispositivo / 2 - canoBaixo.getWidth() - espacoEntreCanos / 2 + posicaoCanoHorizontal,
+				alturaDispositivo / 2 - canoBaixo.getHeight() - espacoEntreCanos / 2 + posicaoCanoVertical,
 				canoBaixo.getWidth(), canoBaixo.getHeight()
 		);
 		retanguloCanoCima.set(
@@ -198,29 +203,55 @@ public class flappybird extends ApplicationAdapter {
 		}
 	}
 	private void desenharTexturas(){
+
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 		batch.draw(fundo,0,0,larguraDispositivo, alturaDispositivo);
 		batch.draw(passaros[ (int) variacao],
 				50 + posicaHorizontalPassaro, posicaoInicialVerticalPassaro);
 		batch.draw(canoBaixo,posicaoCanoHorizontal,
-				alturaDispositivo / 2 - canoBaixo.getHeight() - espacoEntreCanos /2 + posicaoCanoVertical);
-		batch.draw(canoTopo,posicaoCanoHorizontal,
+				alturaDispositivo / 2 - canoBaixo.getHeight() - espacoEntreCanos/2 + posicaoCanoVertical);
+		batch.draw(canoTopo, posicaoCanoHorizontal,
 				alturaDispositivo / 2 + espacoEntreCanos / 2 + posicaoCanoVertical );
 		textoPontuacao.draw(batch, String.valueOf(pontos), larguraDispositivo/2,
 				alturaDispositivo -110);
 
-
-		if (estadoJogo ==2){
+		if (estadoJogo == 2){
 			batch.draw(gameOver, larguraDispositivo / 2 - gameOver.getWidth()/2,
 					alturaDispositivo / 2);
-			textoReiniciar.draw(batch,
-					"Toque para reiniciar!", larguraDispositivo/2 -140,
-					alturaDispositivo/2 - gameOver.getHeight()/2);
+			textoReiniciar.draw(batch, "Toque para reiniciar!",
+					larguraDispositivo/2 -140, alturaDispositivo/2 - gameOver.getHeight()/2 );
 			textoMelhorPontuacao.draw(batch,
-					"Set record é: " + pontuacaoMaxima + "pontos",
+					"Set record é: "+ pontuacaoMaxima +" pontos",
 					larguraDispositivo/2 -140,alturaDispositivo/2 - gameOver.getHeight());
 		}
 		batch.end();
 	}
+
+	private void validarPontos(){
+		if (posicaoCanoHorizontal < 50-passaros[0].getWidth() ){
+			if (!passouCano){
+				pontos++;
+				passouCano = true;
+				somPontuacao.play();
+			}
+		}
+
+		variacao += Gdx.graphics.getDeltaTime() * 10;
+		if (variacao > 3 )
+			variacao = 0;
+	}
+
+	@Override
+	public void resize(int width, int heigth){
+		viewport.update(width, heigth);
+	}
+
+	@Override
+	public void dispose(){
+
+	}
+
+
+
 }
