@@ -150,7 +150,8 @@ public class flappybird extends ApplicationAdapter {
 		somVoando = Gdx.audio.newSound(Gdx.files.internal("som_asa.wav"));
 		somColisao = Gdx.audio.newSound(Gdx.files.internal("som_batida.wav"));
 		somPontuacao = Gdx.audio.newSound(Gdx.files.internal("som_pontos.wav"));
-		coinSound= Gdx.audio.newSound(Gdx.files.internal("coinsound.mp3"));
+		coinSound= Gdx.audio.newSound(Gdx.files.internal("video-game-coin.wav" +
+				""));
 
 
 		preferencias = Gdx.app.getPreferences("flappyBird");
