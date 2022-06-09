@@ -25,7 +25,7 @@ import java.util.Random;
 public class flappybird extends ApplicationAdapter {
 	//variaveis
 	private SpriteBatch batch;
-	private Texture []  passaros;
+	private Texture[]  passaros;
 	private Texture fundo;
 	private Texture canoBaixo;
 	private Texture canoTopo;
@@ -106,7 +106,7 @@ public class flappybird extends ApplicationAdapter {
 		canoBaixo = new Texture("cano_baixo_maior.png");
 		canoTopo = new Texture("cano_topo_maior.png");
 		gameOver = new Texture("game_over.png");
-		moedaPrata = new Texture("moedeprata.png");
+		moedaPrata = new Texture("moedaprata.png");
 		moedaOuro = new Texture("moedadeouro.png");
 		moedaAtual = moedaPrata;
 		logo = new Texture("logo.png");
@@ -150,8 +150,7 @@ public class flappybird extends ApplicationAdapter {
 		somVoando = Gdx.audio.newSound(Gdx.files.internal("som_asa.wav"));
 		somColisao = Gdx.audio.newSound(Gdx.files.internal("som_batida.wav"));
 		somPontuacao = Gdx.audio.newSound(Gdx.files.internal("som_pontos.wav"));
-		coinSound= Gdx.audio.newSound(Gdx.files.internal("video-game-coin.wav" +
-				""));
+		coinSound= Gdx.audio.newSound(Gdx.files.internal("video-game-coin.wav" + ""));
 
 
 		preferencias = Gdx.app.getPreferences("flappyBird");
@@ -252,9 +251,9 @@ public class flappybird extends ApplicationAdapter {
 	private void  detectarColisoes()
 	{
 		circuloPassaro.set(
-				50 + posicaoHorizontalPassaro + passaros [0].getWidth()/2/2,
-				posicaoInicialVerticalPassaro + passaros[0].getHeight()/2/2,
-				passaros[0].getWidth()/2/2
+				50 + posicaoHorizontalPassaro + passaros [0].getWidth()/2 *.4f,
+				posicaoInicialVerticalPassaro + passaros[0].getHeight()/2 *.4f,
+				passaros[0].getWidth()/2*.4f
 		);
 		retanguloCanoBaixo.set(
 				posicaoCanoHorizontal,
@@ -294,12 +293,19 @@ public class flappybird extends ApplicationAdapter {
 		batch.begin();
 
 		batch.draw(fundo,0,0,larguraDispositivo,alturaDispositivo);
-		batch.draw(passaros[ (int) variacao], 50 + posicaoHorizontalPassaro,posicaoInicialVerticalPassaro,passaros[ (int) variacao].getWidth()/2, passaros[ (int) variacao].getHeight()/2);
+		batch.draw
+				(
+						passaros[ (int) variacao],
+						50 + posicaoHorizontalPassaro,
+						posicaoInicialVerticalPassaro,
+						passaros[ (int) variacao].getWidth()*.4f,
+						passaros[ (int) variacao].getHeight()*.4f
+				);
 		batch.draw(canoBaixo, posicaoCanoHorizontal,
 				alturaDispositivo/2 - canoBaixo.getHeight() - espacoEntreCanos/2 + posicaoCanoVertical);
 		batch.draw(canoTopo, posicaoCanoHorizontal,
 				alturaDispositivo/2+espacoEntreCanos/2+posicaoCanoVertical);
-		textoPontuacao.draw(batch,String.valueOf(pontos), larguraDispositivo/2, alturaDispositivo-110);
+		textoPontuacao.draw(batch,String.valueOf(pontos), larguraDispositivo/2 -50, alturaDispositivo-110);
 
 		//desenhar moedas
 		batch.draw(moedaAtual,posicaoMoedaX-moedaAtual.getWidth()*escalaMoeda/2, posicaoMoedaY-moedaAtual.getHeight()*escalaMoeda/2, moedaAtual.getWidth()*escalaMoeda,moedaAtual.getHeight()*escalaMoeda);
