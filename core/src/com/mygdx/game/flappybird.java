@@ -218,14 +218,19 @@ public class flappybird extends ApplicationAdapter {
 		}
 		else if (estadoJogo == 2)
 		{
+
+			//verifica se a pontuação atual é maior do que a anterior se for ele troca
 			if (pontos > pontuacaoMaxima)
 			{
 				pontuacaoMaxima = pontos;
 				preferencias.putInteger("pontuacaoMaxima", pontuacaoMaxima);
 				preferencias.flush();
 			}
+
+			//movimentação horizontal do player
 			posicaoHorizontalPassaro -= Gdx.graphics.getDeltaTime()*500;
 
+			//quando toca a tela para o jogo reiniciar
 			if (toqueTela)
 			{
 				estadoJogo = 0;
@@ -239,6 +244,7 @@ public class flappybird extends ApplicationAdapter {
 		}
 	}
 
+
 	private void resetaMoeda()
 	{
 		posicaoMoedaX = posicaoCanoHorizontal + larguraDispositivo/2;
@@ -248,8 +254,12 @@ public class flappybird extends ApplicationAdapter {
 		else moedaAtual = moedaPrata;
 	}
 
+
+	//gera os colisores nos objetos
 	private void  detectarColisoes()
 	{
+
+		//gera o tamanho do colisor baseado na textura do objeto
 		circuloPassaro.set(
 				50 + posicaoHorizontalPassaro + passaros [0].getWidth()/2 *.4f,
 				posicaoInicialVerticalPassaro + passaros[0].getHeight()/2 *.4f,
@@ -268,16 +278,21 @@ public class flappybird extends ApplicationAdapter {
 
 		circuloMoeda.set(posicaoMoedaX, posicaoMoedaY, moedaAtual.getWidth()*escalaMoeda/2);
 
+		//verifica se um objeto sobrepoem ao outro
 		boolean colidiuCanoCima = Intersector.overlaps(circuloPassaro, retanguloCanoCima);
 		boolean colidiuCanoBaixo = Intersector.overlaps(circuloPassaro, retanguloCanoBaixo);
 		boolean colidiuMoeda = Intersector.overlaps(circuloPassaro, circuloMoeda);
 
+
+		//verifica se colidiu se sim exibe game over
 		if (colidiuCanoCima|| colidiuCanoBaixo){
 			if (estadoJogo == 1){
 				somColisao.play();
 				estadoJogo=2;
 			}
 		}
+
+		//verifica se o player colidiu com alguma moeda se sim adiciona pontos
 		if (colidiuMoeda == true)
 		{
 			if(moedaAtual == moedaOuro) pontos += 10;
@@ -287,25 +302,22 @@ public class flappybird extends ApplicationAdapter {
 			coinSound.play();
 		}
 	}
+
+	//imprime as texturas na tela do dispositivo
 	private void desenharTexturas()
 	{
+		//desenha os objetos presentes na tela de jogo
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 
 		batch.draw(fundo,0,0,larguraDispositivo,alturaDispositivo);
-		batch.draw
-				(
-						passaros[ (int) variacao],
-						50 + posicaoHorizontalPassaro,
-						posicaoInicialVerticalPassaro,
-						passaros[ (int) variacao].getWidth()*.4f,
-						passaros[ (int) variacao].getHeight()*.4f
-				);
+		batch.draw(passaros[ (int) variacao], 50 + posicaoHorizontalPassaro, posicaoInicialVerticalPassaro, passaros[ (int) variacao].getWidth()*.4f, passaros[ (int) variacao].getHeight()*.4f);
 		batch.draw(canoBaixo, posicaoCanoHorizontal,
 				alturaDispositivo/2 - canoBaixo.getHeight() - espacoEntreCanos/2 + posicaoCanoVertical);
 		batch.draw(canoTopo, posicaoCanoHorizontal,
 				alturaDispositivo/2+espacoEntreCanos/2+posicaoCanoVertical);
 		textoPontuacao.draw(batch,String.valueOf(pontos), larguraDispositivo/2 -50, alturaDispositivo-110);
+
 
 		//desenhar moedas
 		batch.draw(moedaAtual,posicaoMoedaX-moedaAtual.getWidth()*escalaMoeda/2, posicaoMoedaY-moedaAtual.getHeight()*escalaMoeda/2, moedaAtual.getWidth()*escalaMoeda,moedaAtual.getHeight()*escalaMoeda);
@@ -316,8 +328,7 @@ public class flappybird extends ApplicationAdapter {
 			batch.draw(logo, larguraDispositivo / 2 - logo.getWidth() / 2, alturaDispositivo / 2);
 		}
 
-
-
+		//desenha a tela de game over
 		if (estadoJogo ==2 )
 		{
 			batch.draw(gameOver, larguraDispositivo/2 - gameOver.getWidth()/2, alturaDispositivo/2);
@@ -328,6 +339,7 @@ public class flappybird extends ApplicationAdapter {
 		batch.end();
 	}
 
+	//verifica se o player passou entre os canos
 	public void validarPontos()
 	{
 		if (posicaoCanoHorizontal < posicaoHorizontalPassaro){
@@ -338,8 +350,9 @@ public class flappybird extends ApplicationAdapter {
 				somPontuacao.play();
 			}
 		}
-		variacao+= Gdx.graphics.getDeltaTime() * 10;
 
+		//cria a animação do passarinho
+		variacao+= Gdx.graphics.getDeltaTime() * 10;
 		if (variacao>3)
 			variacao = 0;
 	}
