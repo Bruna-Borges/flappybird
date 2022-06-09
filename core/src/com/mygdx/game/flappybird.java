@@ -244,7 +244,7 @@ public class flappybird extends ApplicationAdapter {
 		}
 	}
 
-
+	//quando a moeda chega no fim da tela ela retorna ao começo de em pontos aleatórios 
 	private void resetaMoeda()
 	{
 		posicaoMoedaX = posicaoCanoHorizontal + larguraDispositivo/2;
